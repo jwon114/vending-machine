@@ -9,4 +9,24 @@ describe VendingMachine do
       
     end
   end
+
+  describe '#vend' do
+    it 'transacts coins from the till and dispenses product' do
+
+    end
+  end
+
+  describe '#order' do
+
+  end
+
+  describe '#pay' do
+
+  end
+
+  describe '#coins_inserted_sum' do
+    it 'sums the coins inserted into the vending machine' do
+
+    end
+  end
 end

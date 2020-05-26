@@ -8,27 +8,32 @@ class Inventory
     {
       :name => 'Coca Cola',
       :price => 2.00,
-      :quantity => 2
+      :quantity => 2,
+      :code => '1'
     },
     {
       :name => 'Sprite',
       :price => 2.50,
-      :quantity => 2
+      :quantity => 2,
+      :code => '2'
     },
     {
       :name => 'Fanta',
       :price => 2.70,
-      :quantity => 3
+      :quantity => 3,
+      :code => '3'
     },
     {
       :name => 'Orange Juice',
       :price => 3.00,
-      :quantity => 1
+      :quantity => 1,
+      :code => '4'
     },
     {
       :name => 'Water',
       :price => 3.25,
-      :quantity => 0
+      :quantity => 0,
+      :code => '5'
     }
   ]
 
@@ -46,13 +51,24 @@ class Inventory
     self.transactions << new_transaction
   end
 
+  def product_listing
+    PRODUCT_LIST.map do |product|
+      product[:quantity] = products[product[:code]].length
+      product
+    end
+  end
+
+  def find_product(code:)
+    products[code].last
+  end
+
   private
 
   attr_writer :transactions
 
   def generate_products
-    PRODUCT_LIST.map.with_index do |product, index|
-      [(index + 1).to_s, Array.new(product[:quantity], Product.new(name: product[:name], price: product[:price]))]
+    PRODUCT_LIST.map do |product|
+      [product[:code], Array.new(product[:quantity], Product.new(name: product[:name], price: product[:price]))]
     end.to_h
   end
 end

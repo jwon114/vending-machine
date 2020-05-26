@@ -68,4 +68,50 @@ describe Inventory do
       expect(inventory.transactions.first).to have_attributes(:class => Transaction, :product_name => 'Coca Cola', :value => 2.00, :time => Time.now.to_i)
     end
   end
+
+  describe '#product_listing' do
+    it 'should return all the products in the inventory' do
+      expected_list = [
+        {
+          :code => '1',
+          :name => 'Coca Cola',
+          :price => 2.00,
+          :quantity => 2
+        },
+        {
+          :code => '2',
+          :name => 'Sprite',
+          :price => 2.50,
+          :quantity => 2
+        },
+        {
+          :code => '3',
+          :name => 'Fanta',
+          :price => 2.70,
+          :quantity => 3
+        },
+        {
+          :code => '4',
+          :name => 'Orange Juice',
+          :price => 3.00,
+          :quantity => 1
+        },
+        {
+          :code => '5',
+          :name => 'Water',
+          :price => 3.25,
+          :quantity => 0
+        }
+      ]
+
+      expect(inventory.product_listing).to eq(expected_list)
+    end
+  end
+
+  describe '#find_product' do
+    it 'returns a product instance by code' do
+      product = inventory.find_product(code: '1')
+      expect(product).to be_an_instance_of(Product).and have_attributes(:name => 'Coca Cola', :price => 2.00)
+    end
+  end
 end
