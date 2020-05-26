@@ -40,7 +40,7 @@ describe Till do
     end
   end
 
-  describe '#calculate_change' do
+  describe '#change_to_coins' do
     it 'calculates change in coins from amount' do
       expected_change = {
         2.00 => 1,
@@ -49,7 +49,7 @@ describe Till do
         0.01 => 1
       }
 
-      change = till.send(:calculate_change, amount: 2.43)
+      change = till.send(:change_to_coins, amount: 2.43)
       expect(change).to eq(expected_change)
     end
   end
@@ -74,14 +74,14 @@ describe Till do
 
   describe '#transact' do
     it 'removes change coins from till quantities' do
-      change = {
+      change_amount = {
         2.00 => 1,
         1.00 => 1,
         0.50 => 1,
         0.02 => 1
       }
 
-      change_in_coins = till.send(:transact, change: change)
+      change_in_coins = till.send(:transact, change: change_amount)
 
       expect(till.coins[2.0].length).to eq(4)
       expect(till.coins[1.0].length).to eq(4)

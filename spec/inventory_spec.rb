@@ -62,7 +62,7 @@ describe Inventory do
 
   describe '#add_transaction' do
     it 'should add a transaction to the list of transactions' do
-      product = double('product', :name => 'Coca Cola', :value => 2.00)
+      product = double('product', :name => 'Coca Cola', :price => 2.00)
 
       expect{ inventory.add_transaction(product: product) }.to change{ inventory.transactions.length }.by(1)
       expect(inventory.transactions.first).to have_attributes(:class => Transaction, :product_name => 'Coca Cola', :value => 2.00, :time => Time.now.to_i)

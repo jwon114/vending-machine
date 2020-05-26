@@ -47,7 +47,7 @@ class Inventory
   end
 
   def add_transaction(product:)
-    new_transaction = Transaction.new(product_name: product.name, value: product.value, time: Time.now.to_i)
+    new_transaction = Transaction.new(product_name: product.name, value: product.price, time: Time.now.to_i)
     self.transactions << new_transaction
   end
 
@@ -60,6 +60,10 @@ class Inventory
 
   def find_product(code:)
     products[code].last
+  end
+
+  def reload(code:)
+    
   end
 
   private

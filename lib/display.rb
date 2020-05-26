@@ -24,12 +24,13 @@ class Display
       { name: 'Vend', value: 1 },
       { name: 'Reload Inventory', value: 2 },
       { name: 'Reload Till', value: 3 },
+      { name: 'Transaction History', value: 4 },
       { name: 'quit', value: nil }
     ]
     PROMPT.select('Pick a mode', options)
   end
 
-  def product_selection(products:)
+  def product_options(products:)
     list = products.map do |product|
         { name: "#{product[:name]} £#{'%.2f' % product[:price]}, quantity: #{product[:quantity]}", value: product[:code], disabled: ('(out of stock)' if product[:quantity] <= 0) }
       end
@@ -69,15 +70,15 @@ class Display
 
   def product_and_change(product:, change:)
     PROMPT.ok("Here is your: #{product.name}")
-    unless change.empty?
-      breakdown = change.map do |value, quantity|
-        prefix = '£' if value >= 1
-        suffix = 'p' if value < 1
-        "#{prefix unless prefix.nil?}#{'%.2f' % value}#{suffix unless suffix.nil?} x #{quantity}"
+    unless change.nil?
+      breakdown = change.map do |coin|
+        prefix = '£' if coin.value >= 1
+        suffix = 'p' if coin.value < 1
+        "#{prefix unless prefix.nil?}#{'%.2f' % coin.value}#{suffix unless suffix.nil?}"
       end.join(', ')
-      sum = change.sum { |value, quantity| value * quantity }
 
-      PROMPT.ok("and your change of £#{'%.2f' % sum} (#{breakdown})") 
+      total = change.map(&:value).inject(0, &:+)
+      PROMPT.ok("and your change of £#{'%.2f' % total}, coins: [#{breakdown}]") 
     end
   end
 

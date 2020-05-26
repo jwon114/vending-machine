@@ -14,10 +14,13 @@ class Till
   end
 
   def dispense_change(amount:)
-    change = calculate_change(amount: amount)
-    return if change.nil?
-
-    change_in_coins = transact(change: change)
+    change_in_coins = change_to_coins(amount: amount)
+    return if change_in_coins.nil?
+    coins_to_return = transact(change: change_in_coins)
+  end
+  
+  def calculate_change(paid:, price:)
+    (paid - price).round(2)
   end
 
   private
@@ -30,7 +33,7 @@ class Till
     end.to_h
   end
 
-  def calculate_change(amount:)
+  def change_to_coins(amount:)
     change = {}
     remaining_change = amount
     sorted_coins = coins_in_till.sort.reverse
