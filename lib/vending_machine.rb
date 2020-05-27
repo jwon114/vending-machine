@@ -2,6 +2,7 @@ require './lib/coin'
 require './lib/inventory'
 require './lib/till'
 require './lib/display'
+require './lib/transaction'
 require 'pry'
 
 class VendingMachine
@@ -12,6 +13,7 @@ class VendingMachine
     @coins_inserted = []
     @product_selection = nil
     @code_selection = nil
+    @transactions = []
   end
 
   def start
@@ -27,10 +29,9 @@ class VendingMachine
       when 2
         reload_inventory
       when 3
-
+        reload_till
       when 4
-
-
+        machine_transactions
       else
         display.goodbye
         exit
@@ -41,17 +42,27 @@ class VendingMachine
 
   private
 
-  attr_accessor :coins_inserted, :product_selection, :code_selection
+  attr_accessor :coins_inserted, :product_selection, :code_selection, :transactions
   attr_reader :inventory, :till, :display
 
   def vend
+    if inventory.product_unavailable(code: code_selection)
+      add_transaction(product: product_selection, type: :no_product)
+      return display.product_unavailable
+    end
+    
     change = till.calculate_change(paid: coins_inserted_sum, price: product_selection.price)
+    
     if change.positive?
       change_in_coins = till.dispense_change(amount: change)
-      return display.transaction_failed if change_in_coins.nil?
+      if change_in_coins.nil?
+        add_transaction(product: product_selection, type: :no_change)
+        return display.transaction_failed
+      end
     end
+    
     product_purchased = inventory.dispense_product(code: code_selection)
-    inventory.add_transaction(product: product_selection)
+    add_transaction(product: product_selection, type: :sale)
     display.product_and_change(product: product_purchased, change: change_in_coins)
     reset
   end
@@ -90,5 +101,17 @@ class VendingMachine
 
   def reload_inventory
 
+  end
+
+  def reload_till
+
+  end
+
+  def machine_transactions
+    
+  end
+
+  def add_transaction(product:, type:)
+    self.transactions = transactions << Transaction.new(product_name: product.name, value: product.price, time: Time.now.to_i, type: type)
   end
 end

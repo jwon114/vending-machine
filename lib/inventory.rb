@@ -2,7 +2,7 @@ require './lib/product'
 require './lib/transaction'
 
 class Inventory
-  attr_reader :products, :transactions
+  attr_reader :products
 
   PRODUCT_LIST = [
     {
@@ -39,16 +39,14 @@ class Inventory
 
   def initialize
     @products = generate_products
-    @transactions = []
   end
 
   def dispense_product(code:)
     products[code].pop
   end
 
-  def add_transaction(product:)
-    new_transaction = Transaction.new(product_name: product.name, value: product.price, time: Time.now.to_i)
-    self.transactions << new_transaction
+  def product_unavailable
+    products[code].empty?
   end
 
   def product_listing
@@ -63,12 +61,14 @@ class Inventory
   end
 
   def reload(code:)
-    
+    product = PRODUCT_LIST.find { |product| product[:code] == code }
+    new_product = Product.new(name: product[:name], price: product[:price])
+    self.products[code] << new_product
   end
 
   private
 
-  attr_writer :transactions
+  attr_writer :products
 
   def generate_products
     PRODUCT_LIST.map do |product|

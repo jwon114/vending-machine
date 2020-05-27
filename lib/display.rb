@@ -32,7 +32,10 @@ class Display
 
   def product_options(products:)
     list = products.map do |product|
-        { name: "#{product[:name]} £#{'%.2f' % product[:price]}, quantity: #{product[:quantity]}", value: product[:code], disabled: ('(out of stock)' if product[:quantity] <= 0) }
+        { 
+          name: "#{product[:name]} £#{'%.2f' % product[:price]}, quantity: #{product[:quantity]}", 
+          value: product[:code]
+        }
       end
     list << { name: 'back', value: nil }
     

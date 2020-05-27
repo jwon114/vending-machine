@@ -8,7 +8,6 @@ describe Inventory do
   describe '#initialize' do
     it 'should initialize with products' do
       expect(inventory.products).to_not be_empty
-      expect(inventory.transactions).to be_empty
     end
   end
 
@@ -57,15 +56,6 @@ describe Inventory do
       product = inventory.dispense_product(code: '1')
       expect(product.name).to eq('Coca Cola')
       expect(inventory.products['1'].length).to eq(1)
-    end
-  end
-
-  describe '#add_transaction' do
-    it 'should add a transaction to the list of transactions' do
-      product = double('product', :name => 'Coca Cola', :price => 2.00)
-
-      expect{ inventory.add_transaction(product: product) }.to change{ inventory.transactions.length }.by(1)
-      expect(inventory.transactions.first).to have_attributes(:class => Transaction, :product_name => 'Coca Cola', :value => 2.00, :time => Time.now.to_i)
     end
   end
 
