@@ -2,7 +2,7 @@ require './lib/coin'
 require './lib/inventory'
 require './lib/till'
 require './lib/display'
-require './lib/transaction'
+require './lib/account'
 require 'pry'
 
 class VendingMachine
@@ -10,10 +10,9 @@ class VendingMachine
     @display = Display.new
     @inventory = Inventory.new
     @till = Till.new
+    @account = Account.new
     @coins_inserted = []
-    @product_selection = nil
-    @code_selection = nil
-    @transactions = []
+    @item_selected = nil
   end
 
   def start
@@ -23,15 +22,15 @@ class VendingMachine
       case option
       when 1
         order
-        next if product_selection.nil?
-        pay(product: product_selection)
+        next if item_selected.nil?
+        pay(product: item_selected[:product])
         vend
       when 2
         reload_inventory
       when 3
         reload_till
       when 4
-        machine_transactions
+        view_account
       else
         display.goodbye
         exit
@@ -42,76 +41,74 @@ class VendingMachine
 
   private
 
-  attr_accessor :coins_inserted, :product_selection, :code_selection, :transactions
-  attr_reader :inventory, :till, :display
+  attr_accessor :coins_inserted, :item_selected
+  attr_reader :inventory, :till, :display, :account
 
   def vend
-    if inventory.product_unavailable(code: code_selection)
-      add_transaction(product: product_selection, type: :no_product)
-      return display.product_unavailable
-    end
-    
-    change = till.calculate_change(paid: coins_inserted_sum, price: product_selection.price)
-    
+    change = till.calculate_change(paid: sum_coins_inserted, price: item_selected[:product].price)
     if change.positive?
       change_in_coins = till.dispense_change(amount: change)
       if change_in_coins.nil?
-        add_transaction(product: product_selection, type: :no_change)
+        account.add_transaction(item: item_selected, type: :no_change)
         return display.transaction_failed
       end
     end
-    
-    product_purchased = inventory.dispense_product(code: code_selection)
-    add_transaction(product: product_selection, type: :sale)
+
+    product_purchased = inventory.dispense_product(code: item_selected[:code])
+    account.add_transaction(item: item_selected, type: :sale)
     display.product_and_change(product: product_purchased, change: change_in_coins)
     reset
   end
 
   def order
     product_list = inventory.product_listing
-    self.code_selection = display.product_options(products: product_list)
-    return if code_selection.nil?
-    self.product_selection = inventory.find_product(code: code_selection) 
+    self.item_selected = display.product_options(list: product_list)
+    return if item_selected.nil?
+    if inventory.product_unavailable?(code: item_selected[:code])
+      account.add_transaction(item: item_selected, type: :no_product)
+      display.product_unavailable
+      reset
+    end
   end
 
   def pay(product:)
     display.insert_coins(product: product)
-    until coins_inserted_sum >= product_selection.price do
-      remaining_to_pay = product_selection.price - coins_inserted_sum
-      display.more_coins(paid: coins_inserted_sum, remaining: remaining_to_pay)
+    until sum_coins_inserted >= product.price do
+      remaining_to_pay = product.price - sum_coins_inserted
+      display.more_coins(paid: sum_coins_inserted, remaining: remaining_to_pay)
       coin_value = display.coin_options
       insert_coin(value: coin_value)
     end
-    display.total_payment(total: coins_inserted_sum)
+    till.deposit(coins_inserted: coins_inserted)
+    display.total_payment(total: sum_coins_inserted)
   end
 
   def insert_coin(value:)
-    self.coins_inserted = coins_inserted << Coin.new(value: value)
+    coins_inserted << Coin.new(value: value)
   end
 
-  def coins_inserted_sum
+  def sum_coins_inserted
     coins_inserted.map(&:value).inject(0, &:+)
   end
 
   def reset
     self.coins_inserted = []
-    self.product_selection = nil
-    self.code_selection = nil
+    self.item_selected = nil
   end
 
   def reload_inventory
-
+    item = display.select_product_to_reload(list: inventory.product_listing)
+    return if item.nil?
+    inventory.reload(code: item[:code])
   end
 
   def reload_till
-
+    value = display.select_coin_to_reload(coin_list: till.coins_in_till)
+    return if value.nil?
+    till.reload(value: value)
   end
 
-  def machine_transactions
+  def view_account
     
-  end
-
-  def add_transaction(product:, type:)
-    self.transactions = transactions << Transaction.new(product_name: product.name, value: product.price, time: Time.now.to_i, type: type)
   end
 end

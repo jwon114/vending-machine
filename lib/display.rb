@@ -24,22 +24,17 @@ class Display
       { name: 'Vend', value: 1 },
       { name: 'Reload Inventory', value: 2 },
       { name: 'Reload Till', value: 3 },
-      { name: 'Transaction History', value: 4 },
+      { name: 'View Account', value: 4 },
       { name: 'quit', value: nil }
     ]
     PROMPT.select('Pick a mode', options)
   end
 
-  def product_options(products:)
-    list = products.map do |product|
-        { 
-          name: "#{product[:name]} £#{'%.2f' % product[:price]}, quantity: #{product[:quantity]}", 
-          value: product[:code]
-        }
-      end
-    list << { name: 'back', value: nil }
+  def product_options(list:)
+    product_list = list.map { |item| item_details(item: item) }
+    product_list << { name: 'back', value: nil }
     
-    PROMPT.select("Select product", list)
+    PROMPT.select("Select product", product_list)
   end
 
   def invalid_selection
@@ -98,11 +93,18 @@ class Display
     PROMPT.yes?('Continue?')
   end
 
-  def insert_product_to_reload(inventory:)
-    products = inventory.products.map do |product|
-      { name: product.name, value: product.code }
+  def select_product_to_reload(list:)
+    product_list = list.map { |item| item_details(item: item) }
+    product_list << { name: 'back', value: nil }
+    PROMPT.select("Select a product to reload", product_list)
+  end
+
+  def select_coin_to_reload(coin_list:)
+    coins = coin_list.map do |coin|
+      { name: "#{coin[:value]}, quantity in till: #{coin[:quantity]}", value: coin[:value]}
     end
-    PROMPT.select("Insert a product to reload", products)
+    coins << { name: 'back', value: nil }
+    PROMPT.select("Insert a coin to reload", coins)
   end
 
   def products_table(products:)
@@ -112,5 +114,14 @@ class Display
 
   def goodbye
     PROMPT.ok("Goodbye!")
+  end
+
+  private
+
+  def item_details(item:)
+    {
+      name: "#{item[:product].name} £#{'%.2f' % item[:product].price}, quantity: #{item[:quantity]}", 
+      value: item
+    }
   end
 end

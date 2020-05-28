@@ -1,37 +1,31 @@
 require './lib/product'
-require './lib/transaction'
 
 class Inventory
   attr_reader :products
 
   PRODUCT_LIST = [
     {
-      :name => 'Coca Cola',
-      :price => 2.00,
+      :product => Product.new(name: 'Coca Cola', price: 2.00),
       :quantity => 2,
       :code => '1'
     },
     {
-      :name => 'Sprite',
-      :price => 2.50,
+      :product => Product.new(name: 'Sprite', price: 2.50),
       :quantity => 2,
       :code => '2'
     },
     {
-      :name => 'Fanta',
-      :price => 2.70,
+      :product => Product.new(name: 'Fanta', price: 2.70),
       :quantity => 3,
       :code => '3'
     },
     {
-      :name => 'Orange Juice',
-      :price => 3.00,
+      :product => Product.new(name: 'Orange Juice', price: 3.00),
       :quantity => 1,
       :code => '4'
     },
     {
-      :name => 'Water',
-      :price => 3.25,
+      :product => Product.new(name: 'Water', price: 3.25),
       :quantity => 0,
       :code => '5'
     }
@@ -45,14 +39,14 @@ class Inventory
     products[code].pop
   end
 
-  def product_unavailable
+  def product_unavailable?(code:)
     products[code].empty?
   end
 
   def product_listing
-    PRODUCT_LIST.map do |product|
-      product[:quantity] = products[product[:code]].length
-      product
+    PRODUCT_LIST.map do |item|
+      item[:quantity] = products[item[:code]].length
+      item
     end
   end
 
@@ -61,18 +55,15 @@ class Inventory
   end
 
   def reload(code:)
-    product = PRODUCT_LIST.find { |product| product[:code] == code }
-    new_product = Product.new(name: product[:name], price: product[:price])
-    self.products[code] << new_product
+    product = PRODUCT_LIST.find { |item| item[:code] == code }[:product]
+    products[code] <<  product unless product.nil?
   end
 
   private
 
-  attr_writer :products
-
   def generate_products
-    PRODUCT_LIST.map do |product|
-      [product[:code], Array.new(product[:quantity], Product.new(name: product[:name], price: product[:price]))]
+    PRODUCT_LIST.map do |item|
+      [item[:code], Array.new(item[:quantity], item[:product])]
     end.to_h
   end
 end

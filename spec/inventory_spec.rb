@@ -59,42 +59,28 @@ describe Inventory do
     end
   end
 
+  describe '#product_unavailable?' do
+    it 'should be truthy for product with 0 quantity' do
+      expect(inventory.product_unavailable?(code: '5')).to be_truthy
+    end
+
+    it 'should be falsey for product quantity > 0' do
+      expect(inventory.product_unavailable?(code: '1')).to be_falsey
+    end
+  end
+
   describe '#product_listing' do
     it 'should return all the products in the inventory' do
-      expected_list = [
-        {
-          :code => '1',
-          :name => 'Coca Cola',
-          :price => 2.00,
-          :quantity => 2
-        },
-        {
-          :code => '2',
-          :name => 'Sprite',
-          :price => 2.50,
-          :quantity => 2
-        },
-        {
-          :code => '3',
-          :name => 'Fanta',
-          :price => 2.70,
-          :quantity => 3
-        },
-        {
-          :code => '4',
-          :name => 'Orange Juice',
-          :price => 3.00,
-          :quantity => 1
-        },
-        {
-          :code => '5',
-          :name => 'Water',
-          :price => 3.25,
-          :quantity => 0
-        }
-      ]
+      product_listing = inventory.product_listing
 
-      expect(inventory.product_listing).to eq(expected_list)
+      expect(product_listing).to be_a(Array)
+      expect(product_listing.length).to eq(5)
+      product_listing.each do |item|
+        expect(item).to include(:product, :code, :quantity)
+        expect(item[:product]).to be_an_instance_of(Product)
+        expect(item[:code]).to be_a(String)
+        expect(item[:quantity]).to be_a(Integer)
+      end
     end
   end
 
@@ -102,6 +88,17 @@ describe Inventory do
     it 'returns a product instance by code' do
       product = inventory.find_product(code: '1')
       expect(product).to be_an_instance_of(Product).and have_attributes(:name => 'Coca Cola', :price => 2.00)
+    end
+
+    it 'returns nil when a product cannot be found/has zero quantity' do
+      product = inventory.find_product(code: '5')
+      expect(product).to be_nil
+    end
+  end
+
+  describe '#reload' do
+    it 'adds a new instance of product to an existing stash' do
+      expect { inventory.reload(code: '5') }.to change{ inventory.products['5'].length }.from(0).to(1)
     end
   end
 end

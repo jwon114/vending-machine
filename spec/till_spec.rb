@@ -15,6 +15,24 @@ describe Till do
       end
     end
   end
+  
+  describe '#deposit' do
+    it 'deposits coins into the till after payment' do
+      coins = [
+        double('coin', :value => 2.00),
+        double('coin', :value => 2.00),
+        double('coin', :value => 1.00),
+        double('coin', :value => 0.50),
+        double('coin', :value => 0.01)
+      ]
+
+      expect { till.deposit(coins_inserted: coins) }
+      .to change { till.coins[2.00].length }.by(2)
+      .and change { till.coins[1.00].length}.by(1)
+      .and change { till.coins[0.50].length}.by(1)
+      change { till.coins[0.01].length}.by(1)
+    end
+  end
 
   describe '#dispense_change' do
     it 'dispenses change of amount' do
@@ -26,6 +44,19 @@ describe Till do
         have_attributes(class: Coin, value: 0.02),
         have_attributes(class: Coin, value: 0.01)
       ])
+    end
+  end
+
+  describe '#calculate_change' do
+    it 'should calculate change based on price and paid' do
+      change = till.calculate_change(paid: 5.00, price: 2.23)
+      expect(change).to eq(2.77)
+    end
+  end
+
+  describe '#reload' do
+    it 'should reload the till with a coin of value' do
+      expect { till.reload(value: 0.50) }.to change { till.coins[0.50].length }.from(5).to(6)
     end
   end
 
@@ -56,17 +87,17 @@ describe Till do
 
   describe '#coins_in_till' do
     it 'returns the coins in till grouped by value' do
-      coins = till.send(:coins_in_till)
-      expected_coins = {
-        2.00 => 5, 
-        1.00 => 5, 
-        0.50 => 5, 
-        0.20 => 5, 
-        0.10 => 5, 
-        0.05 => 5, 
-        0.02 => 5, 
-        0.01 => 5
-      }
+      coins = till.coins_in_till
+      expected_coins = [
+        { :value => 2.00, :quantity => 5 }, 
+        { :value => 1.00, :quantity => 5 }, 
+        { :value => 0.50, :quantity => 5 }, 
+        { :value => 0.20, :quantity => 5 }, 
+        { :value => 0.10, :quantity => 5 }, 
+        { :value => 0.05, :quantity => 5 }, 
+        { :value => 0.02, :quantity => 5 }, 
+        { :value => 0.01, :quantity => 5 }
+      ]
       
       expect(coins).to eq(expected_coins)    
     end
@@ -99,5 +130,4 @@ describe Till do
       ])
     end
   end
-  
 end

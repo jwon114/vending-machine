@@ -9,23 +9,31 @@ class Till
     @coins = generate_coins
   end
 
-  def is_valid?(coin:)
-    VALID_COINS.includes?(coin.value)
+  def deposit(coins_inserted: [])
+    coins_inserted.each { |coin| coins[coin.value] << coin }
   end
 
   def dispense_change(amount:)
     change_in_coins = change_to_coins(amount: amount)
     return if change_in_coins.nil?
-    coins_to_return = transact(change: change_in_coins)
+    transact(change: change_in_coins)
   end
   
   def calculate_change(paid:, price:)
     (paid - price).round(2)
   end
 
-  private
+  def reload(value:)
+    coins[value] << Coin.new(value: value) if VALID_COINS.include?(value)
+  end
 
-  attr_writer :coins
+  def coins_in_till
+    coins.map { |value, coins_list| { value: value, quantity: coins_list.length } }
+      .sort_by {|coin| coin[:value] }
+      .reverse
+  end
+
+  private
 
   def generate_coins
     VALID_COINS.map do |value|
@@ -36,9 +44,8 @@ class Till
   def change_to_coins(amount:)
     change = {}
     remaining_change = amount
-    sorted_coins = coins_in_till.sort.reverse
-    sorted_coins.each do |coin_pair|
-      value, quantity = coin_pair
+    coins_in_till.each do |coin|
+      value, quantity = coin[:value], coin[:quantity]
       next if value > remaining_change
       count, remainder = remaining_change.divmod(value)
       change[value] = count if count.positive? && quantity.positive?
@@ -46,10 +53,6 @@ class Till
       break if remaining_change.zero?
     end
     remaining_change.zero? ? change : nil
-  end
-
-  def coins_in_till
-    coins.map { |value, coins_list| [value, coins_list.length] }.to_h
   end
 
   def transact(change:)
