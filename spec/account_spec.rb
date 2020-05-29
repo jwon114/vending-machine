@@ -30,33 +30,31 @@ describe Account do
       account.instance_variable_set(:@transactions, transaction_data)
       items = account.popular_items
       expect(items.length).to eq(3)
-      # binding.pry
-      expect(items.first).to have_attributes(:product_name)
-      # expect(items.second).to have_attributes(:product_name => 'Sprite', :quantity => 3)
-      # expect(items.third).to have_attributes(:product_name => 'Water', :quantity => 2)
+      expect(items.first).to eq({ 4 => ['Coca Cola'] })
+      expect(items[1]).to match_array({ 3 => ['Sprite'] })
+      expect(items.last).to match_array({ 2 => ['Water'] })
     end
 
-    # it 'should list top 3 even when equal number of sales' do
-    #   transaction_data = [
-    #     double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :sale),
-    #     double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :sale),
-    #     double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :no_product),
-    #     double('transaction', :product_name => 'Sprite', :value => 2.50, :type => :sale),
-    #     double('transaction', :product_name => 'Sprite', :value => 2.50, :type => :no_change),
-    #     double('transaction', :product_name => 'Water', :value => 3.25, :type => :sale),
-    #     double('transaction', :product_name => 'Orange Juice', :value => 3.00, :type => :sale)
-    #   ]
+    it 'should list top 3 even when equal number of sales' do
+      transaction_data = [
+        double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :sale),
+        double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :sale),
+        double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :sale),
+        double('transaction', :product_name => 'Coca Cola', :value => 2.00, :type => :no_product),
+        double('transaction', :product_name => 'Sprite', :value => 2.50, :type => :sale),
+        double('transaction', :product_name => 'Sprite', :value => 2.50, :type => :sale),
+        double('transaction', :product_name => 'Sprite', :value => 2.50, :type => :no_change),
+        double('transaction', :product_name => 'Water', :value => 3.25, :type => :sale),
+        double('transaction', :product_name => 'Orange Juice', :value => 3.00, :type => :sale)
+      ]
 
-    #   account.instance_variable_set(:@transactions, transaction_data)
-    #   popular_items = account.popular_items
-    #   expect(popular_items.length).to eq(3)
-    #   expect(popular_items.first).to have_attributes(:product_name => 'Coca Cola', :quantity => 3)
-    #   expect(popular_items.second).to have_attributes(:product_name => 'Sprite', :quantity => 2)
-    #   expect(popular_items.third).to match_array([
-    #     have_attributes(:product_name => 'Water', :quantity => 1),
-    #     have_attributes(:product_name => 'Orange Juice', :quantity => 1),
-    #   ])
-    # end
+      account.instance_variable_set(:@transactions, transaction_data)
+      items = account.popular_items
+      expect(items.length).to eq(3)
+      expect(items.first).to eq({ 3 => ['Coca Cola'] })
+      expect(items[1]).to eq({ 2 => ['Sprite'] })
+      expect(items.last).to eq({ 1 => ['Water', 'Orange Juice'] })
+    end
   end
 
   describe '#sales_lost_product' do
