@@ -9,7 +9,7 @@ class Account
   end
 
   def popular_items
-    sale_transactions
+    transactions_by_type(type: :sale)
       .group_by { |transaction| transaction.product_name }
       .inject(Hash.new) do |h, (product_name, transactions)|
         h[transactions.length] ||= []
@@ -23,14 +23,16 @@ class Account
   end
 
   def sales_lost_product
-
+    no_product_transactions = transactions_by_type(type: :no_product)
+    lost_value(transactions: no_product_transactions)
   end
 
   def sales_lost_change
-
+    no_change_transactions = transactions_by_type(type: :no_change)
+    lost_value(transactions: no_change_transactions)
   end
 
-  def popular_items_per_day
+  def popular_item_per_day
 
   end
 
@@ -40,15 +42,16 @@ class Account
 
   private
 
-  def sale_transactions
-    transactions.select { |transaction| transaction.type == :sale }
+  attr_writer :transactions
+
+  def transactions_by_type(type:)
+    transactions.select { |transaction| transaction.type == type }
   end
 
-  def no_product_transactions
-
-  end
-
-  def no_change_transactions
-
+  def lost_value(transactions:)
+    {
+      :total_value => transactions.sum { |transaction| transaction.value },
+      :count => transactions.count
+    }
   end
 end
