@@ -112,6 +112,16 @@ class Display
     puts table.render(:ascii)
   end
 
+  def account_details(popular_items:, sales_lost_product:, sales_lost_change:, popular_item_per_day:)
+    puts "Popular Items: #{popular_sales(items: popular_items)}"
+    puts "Sales Lost by Product Total: #{sales_lost_product[:total]}"
+    puts "Sales Lost by Product Count: #{sales_lost_product[:count]}"
+    puts "Sales Lost by Change Total: #{sales_lost_change[:total]}"
+    puts "Sales Lost by Change Count: #{sales_lost_change[:count]}"
+    puts "Popular Item per Day of Week:
+    #{items_per_day_of_week(items: popular_item_per_day)}"
+  end
+
   def goodbye
     PROMPT.ok("Goodbye!")
   end
@@ -123,5 +133,21 @@ class Display
       name: "#{item[:product].name} £#{'%.2f' % item[:product].price}, quantity: #{item[:quantity]}", 
       value: item
     }
+  end
+
+  def popular_sales(items:)
+    items.flat_map do |item|
+      "Item: #{item.values.first}, Sold: #{item.keys.first}"
+    end
+  end
+
+  def items_per_day_of_week(items:)
+    "Monday: #{items[:Monday]}
+    Tuesday: #{items[:Tuesday]}
+    Wednesday: #{items[:Wednesday]}
+    Thursday: #{items[:Thursday]}
+    Friday: #{items[:Friday]}
+    Saturday: #{items[:Saturday]}
+    Sunday: #{items[:Sunday]}"
   end
 end

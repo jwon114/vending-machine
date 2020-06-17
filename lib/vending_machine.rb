@@ -109,6 +109,13 @@ class VendingMachine
   end
 
   def view_account
-    
+    details = {
+      popular_items: account.popular_items, 
+      sales_lost_product: account.sales_lost(type: :no_product), 
+      sales_lost_change: account.sales_lost(type: :no_change), 
+      popular_item_per_day: account.popular_item_per_day
+    }
+
+    display.account_details(**details)
   end
 end
