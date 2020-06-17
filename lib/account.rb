@@ -22,18 +22,30 @@ class Account
       .map { |quantity, products| { quantity => products } }
   end
 
-  def sales_lost_product
-    no_product_transactions = transactions_by_type(type: :no_product)
-    lost_value(transactions: no_product_transactions)
-  end
-
-  def sales_lost_change
-    no_change_transactions = transactions_by_type(type: :no_change)
-    lost_value(transactions: no_change_transactions)
+  def sales_lost(type:)
+    lost_value(transactions: transactions_by_type(type: type))
   end
 
   def popular_item_per_day
+    most_popular_products = transactions_by_type(type: :sale)
+      .group_by do |transaction|
+        day = Time.at(transaction.time).strftime('%A').to_sym
+        day      
+      end
+      .inject(Hash.new) do |h, (day, products)|
+        h[day] = most_common(list: products.map(&:product_name))
+        h
+      end
 
+    {
+      :Monday => nil,
+      :Tuesday => nil,
+      :Wednesday => nil,
+      :Thursday => nil,
+      :Friday => nil,
+      :Saturday => nil,
+      :Sunday => nil
+    }.merge(most_popular_products)
   end
 
   def add_transaction(item:, type:)
@@ -53,5 +65,16 @@ class Account
       :total_value => transactions.sum { |transaction| transaction.value },
       :count => transactions.count
     }
+  end
+
+  def most_common(list:)
+    list.group_by(&:itself)
+      .inject(Hash.new) do |h, (item, list)| 
+        h[list.count] ||= []; 
+        h[list.count] << item; 
+        h
+      end
+      .max
+      .last
   end
 end
