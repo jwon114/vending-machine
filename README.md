@@ -20,8 +20,7 @@ will be of denominations 1p, 2p, 5p, 10p, 20p, 50p, £1, £2.
 To get started with the project:
 
 ### Prerequisites
-Requirements to run the project.
-- Ruby 2.6.5
+Ruby 2.6.5 is required for the project.
 
 ### Installation
 Clone or download project.
@@ -31,54 +30,33 @@ Install Gem dependencies.
 bundle install
 ```
 
-### Entry Point
-Entry point is vending_machine.rb file. Tests contain example input data when initialising vending machine.
+### Entry Point & Initialization
+The vending machine entry point is main.rb
 
-Vending machine initialisation
+Initialized with the following products in inventory:
+Product Name | Price | Quantity
+------------ | ----- | --------
+Coca Cola | 2.00 | 2
+Sprite | 2.50 | 2
+Fanta | 2.70 | 3
+Orange Juice | 3.00 | 1
+Water | 3.25 | 0
+
+Initialized with the following coins in till:
+Value | Quantity
+----- | --------
+2.00 | 5
+1.00 | 5
+0.50 | 5
+0.20 | 5
+0.10 | 5
+0.05 | 5
+0.02 | 5
+0.01 | 5
+
+To start the vending machine:
 ```
-# Products input with price in £.
-products = {
-  '01' => {
-    :name => 'Coca Cola',
-    :price => 1.60,
-    :quantity => 2
-  },
-  '02' => {
-    :name => 'Sprite',
-    :price => 1.50,
-    :quantity => 2
-  },
-  '03' => {
-    :name => 'Fanta',
-    :price => 1.45,
-    :quantity => 2
-  },
-  '04' => {
-    :name => 'Orange Juice',
-    :price => 2.00,
-    :quantity => 0
-  },
-  '05' => {
-    :name => 'Water',
-    :price => 2.23,
-    :quantity => 1
-  }
-}
-
-# Coins input to vending machine, where the keys are coin types, 2.00 is £2 and 0.01 is £0.01, and values are coin quantities.
-coins = {
-  0.01 => 0,
-  0.02 => 4,
-  0.05 => 5,
-  0.10 => 6,
-  0.20 => 2,
-  0.50 => 4,
-  1.00 => 7,
-  2.00 => 8
-}
-
-vending_machine = VendingMachine.new(products: products, coins: coins)
-product, change = vending_machine.vend(code: '01', paid: 3.20)
+ruby main.rb
 ```
 
 ## Running the Tests
@@ -88,29 +66,32 @@ rspec
 ```
 
 ## Implementation Details
-Started with a main vending machine class to encapsulate all functionalities. Creating a new instance of vending machine initialises the product inventory and till for dispensing change. Class attributes inventory and till are class instances of Inventory and Till respectively. Vending machine manages the inventory and till interaction, and can be reloaded with new values. Classes such as Inventory and Till create a separation of concerns, and enable the vending machine to focus on the exchange of money and product.
+Started with simple classes for Coins and Products. The Coin class is attributed by a single value in GBP. An instance of Product has a name and price. Till and Inventory classes hold instances of the Coin and Product respectively to represent quantities, and contain transactional logic to manage such quantities.
 
-Inventory class manages product queries such as name, quantity and price. When a product is dispensed, product quantites are also managed here.
+Calculation of the coins returned after a sale uses a greedy algorithm. The coins are ordered by value, from largest to smallest, and iterated to select the largest denomination of coin which is not greater than the remaining amount to be made. However it will not calculate the fewest number of coins. An example, if the coin denominations were 1, 3 and 4, then to make 6 this algorithm would choose (4,1,1), whereas the optimal solution is (3,3).
 
-Any transactions of change is handled by the Till class. This class manages the coins used for change held by the vending machine. When an action to request change is fired, a breakdown of the coins and quantities is performed. This build a hash of which coins and how many are required to satisfy the change amount, with an attempt to use the fewest number of coins possible. Insufficient till funds could be raised when there are not enough coins to equal the change returned. When the correct change is calculated, the breakdown hash is merged with its current coin collection to complete the transaction.
+A Transaction class describes a single transaction that occurs in the vending machine. Transactions are in the form of a sale, no product available or no change available. All transactions are stored in memory and performance metrics are done by an Account class.
 
-Error exceptions were raised handle situations such as insufficient funds inserted, incorrect code selection, product availablity and so forth.
+This vending machine uses the interactive command line prompt, tty-prompt, for user interaction. Display class methods interface between tty-prompt and the vending machine.
 
 ## Decisions Made
 - To use classes and maintain a separation of concerns.
-- Products data as a hash with selection code as a key and product details as values.
-- Coins data hash to track which coins and how many are in the vending machine till.
-- Products class to manage vending machine products.
-- Till class to manage vending machine till.
+- Products are modelled by a Product class with name and price.
+- Coins are modelled by a Coin class with value.
+- Inventory manages Products quantities.
+- Till manages Coin quantities and transactions with coin change.
+- Transaction has a product name, value, time and type. Time is Epoch time. Type could be sale, no product available, no change available.
+- Account manages Transactions and perfomance metrics.
+- Display is an interface between tty-prompt and vending machine.
 
 ## Future Improvements
 Future improvements if I had more time to work on this project
 
-- Refactor or improve the coins in change calculation.
-- Return a breakdown of change when dispensing.
-- Separate some of the calculation logic from the vending machine class.
-- User interface to interact with the project.
+- Try a different algorithm to return optimal number of coins in change.
+- Separation of concerns in the vending machine class.
+- Redesign account details display.
 
 ## Built With
 - Ruby 2.6.5
 - RSpec
+- tty-prompt, tty-table
