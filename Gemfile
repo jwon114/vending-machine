@@ -1,7 +1,10 @@
 source 'https://rubygems.org'
 
-gem 'rspec'
-gem 'pry'
-gem 'pry-nav'
 gem 'tty-prompt'
 gem 'tty-table'
+
+group :test, :development do
+  gem 'pry'
+  gem 'pry-nav'
+  gem 'rspec'
+end

@@ -3,7 +3,6 @@ require './lib/inventory'
 require './lib/till'
 require './lib/display'
 require './lib/account'
-require 'pry'
 
 class VendingMachine
   def initialize

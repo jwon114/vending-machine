@@ -1,6 +1,5 @@
 require 'spec_helper'
 require './lib/inventory'
-require 'pry'
 
 describe Inventory do
   let(:inventory) { described_class.new }

@@ -1,6 +1,5 @@
 require 'spec_helper'
 require './lib/vending_machine'
-require 'pry'
 
 describe VendingMachine do
   let(:vending_machine) { described_class.new }

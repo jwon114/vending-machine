@@ -114,9 +114,9 @@ class Display
 
   def account_details(popular_items:, sales_lost_product:, sales_lost_change:, popular_item_per_day:)
     puts "Popular Items: #{popular_sales(items: popular_items)}"
-    puts "Sales Lost by Product Total: #{sales_lost_product[:total]}"
+    puts "Sales Lost by Product Total: #{sales_lost_product[:total_value]}"
     puts "Sales Lost by Product Count: #{sales_lost_product[:count]}"
-    puts "Sales Lost by Change Total: #{sales_lost_change[:total]}"
+    puts "Sales Lost by Change Total: #{sales_lost_change[:total_value]}"
     puts "Sales Lost by Change Count: #{sales_lost_change[:count]}"
     puts "Popular Item per Day of Week:
     #{items_per_day_of_week(items: popular_item_per_day)}"

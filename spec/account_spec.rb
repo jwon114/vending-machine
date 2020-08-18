@@ -1,6 +1,5 @@
 require 'spec_helper'
 require './lib/account'
-require 'pry'
 
 describe Account do
   let(:account) { described_class.new }

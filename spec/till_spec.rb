@@ -1,6 +1,5 @@
 require 'spec_helper'
 require './lib/till'
-require 'pry'
 
 describe Till do
   let(:till) { described_class.new }
